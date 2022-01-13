@@ -24,6 +24,15 @@ class Parser
     {
         return new Ofx($xml);
     }
+    /**
+     * Factory to extend support for OFX document structures.
+     * @param SimpleXMLElement $xml
+     * @return Ofc
+     */
+    protected function createOfc(SimpleXMLElement $xml)
+    {
+        return new Ofc($xml);
+    }
 
     /**
      * Load an OFX file into this parser by way of a filename
@@ -52,22 +61,35 @@ class Parser
         $ofxContent = str_replace(["\r\n", "\r"], "\n", $ofxContent);
         $ofxContent = utf8_encode($ofxContent);
 
-        $sgmlStart = stripos($ofxContent, '<OFX>');
-        $ofxHeader =  trim(substr($ofxContent, 0, $sgmlStart));
-        $header = $this->parseHeader($ofxHeader);
+        $sgmlStart = stripos($ofxContent, '<OFC>');
+        if ($sgmlStart === 0) {
+            $header = [];
+            $type = 'ofc';
+        } else {
+            $sgmlStart = stripos($ofxContent, '<OFX>');
+            $ofxHeader =  trim(substr($ofxContent, 0, $sgmlStart));
+            $header = $this->parseHeader($ofxHeader);
+            $type = 'ofx';
+        }
 
         $ofxSgml = trim(substr($ofxContent, $sgmlStart));
-        if (stripos($ofxHeader, '<?xml') === 0) {
+        if ($type === 'ofx' && stripos($ofxHeader, '<?xml') === 0) {
             $ofxXml = $ofxSgml;
         } else {
             $ofxSgml = $this->conditionallyAddNewlines($ofxSgml);
             $ofxXml = $this->convertSgmlToXml($ofxSgml);
         }
-
+//        header('Content-Type: application/xml');
+//        echo $ofxXml;exit;
         $xml = $this->xmlLoadString($ofxXml);
 
-        $ofx = $this->createOfx($xml);
-        $ofx->buildHeader($header);
+        if ($type === 'ofc') {
+            $ofx = $this->createOfc($xml);
+            //$ofx->buildHeader($header);
+        } else {
+            $ofx = $this->createOfx($xml);
+            $ofx->buildHeader($header);
+        }
 
         return $ofx;
     }
@@ -80,7 +102,7 @@ class Parser
      */
     private function conditionallyAddNewlines($ofxContent)
     {
-        if (preg_match('/<OFX>.*<\/OFX>/', $ofxContent) === 1) {
+        if (preg_match('/<OFX>.*<\/OFX>/', $ofxContent) === 1 || preg_match('/<OFC>.*<\/OFC>/', $ofxContent) === 1) {
             return str_replace('<', "\n<", $ofxContent); // add line breaks to allow XML to parse
         }
 
