@@ -61,6 +61,7 @@ class Parser
         $ofxContent = str_replace(["\r\n", "\r"], "\n", $ofxContent);
         $ofxContent = utf8_encode($ofxContent);
 
+
         $sgmlStart = stripos($ofxContent, '<OFC>');
         if ($sgmlStart === 0) {
             $header = [];
@@ -81,7 +82,13 @@ class Parser
         }
 //        header('Content-Type: application/xml');
 //        echo $ofxXml;exit;
-        $xml = $this->xmlLoadString($ofxXml);
+        
+        // Support situations where the XML gets processed unnecessarily
+        try {
+            $xml = $this->xmlLoadString($ofxXml);
+        } catch(\Exception $e) {
+            $xml = $this->xmlLoadString($ofxSgml);
+        }
 
         if ($type === 'ofc') {
             $ofx = $this->createOfc($xml);

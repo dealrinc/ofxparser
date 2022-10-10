@@ -2,6 +2,7 @@
 
 namespace OfxParser;
 
+use OfxParser\Utils;
 use SimpleXMLElement;
 use OfxParser\Utils;
 use OfxParser\Entities\AccountInfo;
@@ -113,6 +114,10 @@ class Ofx
         $signOn->institute = new Institute();
         $signOn->institute->name = $xml->FI->ORG;
         $signOn->institute->id = $xml->FI->FID;
+        $path = 'INTU.BID';
+        if (isset($xml->$path)) {
+            $signOn->intu_bid_id = $xml->$path;
+        }
 
         return $signOn;
     }
