@@ -4,7 +4,6 @@ namespace OfxParser;
 
 use OfxParser\Utils;
 use SimpleXMLElement;
-use OfxParser\Utils;
 use OfxParser\Entities\AccountInfo;
 use OfxParser\Entities\BankAccount;
 use OfxParser\Entities\Institute;
