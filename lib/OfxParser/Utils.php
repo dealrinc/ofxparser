@@ -89,18 +89,18 @@ class Utils
     public static function createAmountFromStr($amountString)
     {
         // Decimal mark style (UK/US): 000.00 or 0,000.00
-        if (preg_match('/^(-|\+)?([\d,]+)(\.?)([\d]{2,10})$/', $amountString) === 1) {
+        if (preg_match('/^(-|\+)?([\d,]+)(\.?)([\d]{2,10})?$/', $amountString) === 1) {
             return (float)preg_replace(
-                ['/([,]+)/', '/\.?([\d]{2})$/'],
+                ['/([,]+)/', '/\.([\d]{2,10})$/'],
                 ['', '.$1'],
                 $amountString
             );
         }
 
         // European style: 000,00 or 0.000,00
-        if (preg_match('/^(-|\+)?([\d\.]+,?[\d]{2})$/', $amountString) === 1) {
+        if (preg_match('/^(-|\+)?([\d\.]+,?[\d]{2})?$/', $amountString) === 1) {
             return (float)preg_replace(
-                ['/([\.]+)/', '/,?([\d]{2})$/'],
+                ['/([\.]+)/', '/,?([\d]{2})?$/'],
                 ['', '.$1'],
                 $amountString
             );
